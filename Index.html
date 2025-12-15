@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clicker Game</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: monospace;
+      background: #f4f4f4;
+      color: #222;
+      text-align: center;
+    }
+
+    #clicker {
+      width: 180px;
+      cursor: pointer;
+      transition: transform 0.08s;
+      display: none;
+    }
+
+    #clicker:active {
+      transform: scale(0.9);
+    }
+
+    #timer, #countdown {
+      font-size: 36px;
+      margin: 10px;
+      background: #e0e0e0;
+      padding: 8px 16px;
+      border-radius: 6px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 22px;
+      font-size: 18px;
+      font-family: monospace;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: #fff;
+    }
+
+    #retry {
+      display: none;
+    }
+
+    #stats {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="countdown"></div>
+
+  <img
+    id="clicker"
+    src="https://i.ibb.co/JRyyRhW7/etrethetgherg-removebg-preview.png"
+    alt="Clicker"
+  >
+
+  <div id="timer"></div>
+  <div id="stats"></div>
+
+  <button id="readyBtn">Ready!</button>
+  <button id="retry">Retry</button>
+
+  <script>
+    const clicker = document.getElementById('clicker');
+    const timerEl = document.getElementById('timer');
+    const countdownEl = document.getElementById('countdown');
+    const statsEl = document.getElementById('stats');
+    const readyBtn = document.getElementById('readyBtn');
+    const retryBtn = document.getElementById('retry');
+
+    const GAME_TIME = 40;
+    let timeLeft = 0;
+    let clicks = 0;
+    let gameInterval;
+
+    function formatTime(sec) {
+      return `00:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function registerClick() {
+      if (timeLeft <= 0) return;
+      clicks++;
+      clicker.style.transform = 'scale(1.1)';
+      setTimeout(() => clicker.style.transform = 'scale(1)', 40);
+    }
+
+    function startCountdown() {
+      readyBtn.style.display = 'none';
+      statsEl.textContent = '';
+      countdownEl.textContent = '3';
+
+      let c = 3;
+      const cd = setInterval(() => {
+        c--;
+        countdownEl.textContent = c;
+        if (c === 0) {
+          clearInterval(cd);
+          countdownEl.textContent = '';
+          startGame();
+        }
+      }, 1000);
+    }
+
+    function startGame() {
+      clicks = 0;
+      timeLeft = GAME_TIME;
+      clicker.style.display = 'block';
+      timerEl.textContent = formatTime(timeLeft);
+
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = formatTime(timeLeft);
+        if (timeLeft <= 0) endGame();
+      }, 1000);
+    }
+
+    function endGame() {
+      clearInterval(gameInterval);
+      clicker.style.display = 'none';
+      const cps = (clicks / GAME_TIME).toFixed(2);
+      statsEl.innerHTML = `
+        Total Clicks: ${clicks}<br>
+        Clicks / Second: ${cps}
+      `;
+      retryBtn.style.display = 'inline-block';
+    }
+
+    // Mouse click
+    clicker.addEventListener('click', registerClick);
+
+    // Spacebar (NO HOLDING)
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !e.repeat) {
+        registerClick();
+        e.preventDefault();
+      }
+    });
+
+    readyBtn.addEventListener('click', startCountdown);
+    retryBtn.addEventListener('click', () => {
+      retryBtn.style.display = 'none';
+      startCountdown();
+    });
+  </script>
+</body>
+</html>
